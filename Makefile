@@ -2,10 +2,10 @@
 KIND_VERSION ?= 0.24.0
 GIROPOPS_SENHAS_VERSION ?= 1.0
 GIROPOPS_LOCUST_VERSION ?= 1.0
-ISTIO_VERSION ?= 1.17.1
-CHAOS_MESH_VERSION ?= v2.5.1
-KIALI_VERSION ?= 1.17
-METALLB_VERSION ?= v0.13.9
+ISTIO_VERSION ?= 1.23.0
+CHAOS_MESH_VERSION ?= v2.6.3
+KIALI_VERSION ?= 1.23
+METALLB_VERSION ?= v0.14.8
 KUBERNETES_DASHBOARD_VERSION ?= v2.7.0
 KUBERNETES_VERSION ?= v1.30.0
 
@@ -98,7 +98,7 @@ argocd:
 	kubectl wait --for=condition=ready --timeout=10m pod -l app.kubernetes.io/name=argocd-server -n argocd
 	$(MAKE) argo_login
 	$(MAKE) add_cluster
-	ps -ef | grep -v "ps -ef" | grep kubectl | grep port-forward | grep argocd-server | awk '{print $$2}' | xargs kill
+	ps -ef | grep -v "ps -ef" | grep kubectl | grep port-forward | grep argocd-server | awk '{print $2}' | xargs kill
 	kubectl label namespace default istio-injection=enabled
 	kubectl label namespace argocd istio-injection=enabled
 	@echo "ArgoCD foi instalado com sucesso!"
@@ -123,7 +123,8 @@ giropops-locust:
 	sleep 2
 	argocd app create giropops-locust --repo https://github.com/badtuxx/giropops-senhas.git --path . --dest-name $(CLUSTER) --dest-namespace default
 	argocd app sync giropops-locust
-	ps -ef | grep -v "ps -ef" | grep kubectl | grep port-forward | grep argocd-server | awk '{print $$2}' | xargs kill
+	@sleep 180
+	ps -ef | grep -v "ps -ef" | grep kubectl | grep port-forward | grep argocd-server | awk '{print $2}' | grep -E '^[0-9]+$' | xargs --no-run-if-empty kill
 	@echo "Giropops-Locust foi instalado com sucesso!"
 
 # Instalando o Kube-Prometheus
@@ -173,12 +174,12 @@ kiali:
 	@echo "Kiali foi instalado com sucesso!"
 	
 # Instalando o Chaos Mesh
-# .PHONY: chaos-mesh
-# chaos-mesh:
-# 	@echo "Instalando o Chaos Mesh Operator"
-# 	curl -fsSL https://mirrors.chaos-mesh.org/${CHAOS_MESH_VERSION}/install.sh | bash -s -- --local kind --name kind-linuxtips
-# 	sleep 3
-# 	@echo "Chaos Mesh instalado com sucesso!"
+.PHONY: chaos-mesh
+chaos-mesh:
+	@echo "Instalando o Chaos Mesh Operator"
+	curl -fsSL https://mirrors.chaos-mesh.org/${CHAOS_MESH_VERSION}/install.sh | bash -s -- --local kind --name kind-linuxtips
+	sleep 3
+	@echo "Chaos Mesh instalado com sucesso!"
 
 # Instalando o Kubernetes Dashboard
 .PHONY: kubernetes-dashboard
