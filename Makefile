@@ -4,7 +4,7 @@ GIROPOPS_SENHAS_VERSION ?= 1.0
 GIROPOPS_LOCUST_VERSION ?= 1.0
 ISTIO_VERSION ?= 1.23.0
 CHAOS_MESH_VERSION ?= v2.6.3
-KIALI_VERSION ?= 1.23
+KIALI_ISTIO_ADDON_VERSION ?= 1.23
 METALLB_VERSION ?= v0.14.8
 KUBERNETES_DASHBOARD_VERSION ?= v2.7.0
 KUBERNETES_VERSION ?= v1.30.0
@@ -175,7 +175,7 @@ istio:
 .PHONY: kiali
 kiali: 
 	@echo "Instalando o Kiali..."
-	kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-${KIALI_VERSION}/samples/addons/kiali.yaml
+	kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-${KIALI_ISTIO_ADDON_VERSION}/samples/addons/kiali.yaml
 	kubectl wait --for=condition=ready --timeout=10m pod -l app=kiali -n istio-system
 	kubectl apply -f istio-config/
 	kubectl rollout restart deployment kiali -n istio-system
@@ -215,7 +215,7 @@ argocd-token:
 	if [ -z "$$TOKEN" ]; then \
 		echo "Erro: Não foi possível obter o token. Verifique se o ArgoCD está instalado corretamente."; \
 	else \
-		echo "Token de acesso ao ArgoCD: $$TOKEN"; \
+		echo "Token de acesso ao ArgoCD: $LocustTOKEN"; \
 	fi
 
 # Removendo o Kind e limpando tudo que foi instalado
