@@ -98,7 +98,10 @@ argocd:
 	kubectl wait --for=condition=ready --timeout=10m pod -l app.kubernetes.io/name=argocd-server -n argocd
 	$(MAKE) argo_login
 	$(MAKE) add_cluster
-	ps -ef | grep -v "ps -ef" | grep kubectl | grep port-forward | grep argocd-server | awk '{print $2}' | xargs kill
+	sleep 60
+	@echo "Killing port-forward process..."
+	@(ps -ef | grep -v grep | grep kubectl | grep port-forward | grep argocd-server; echo $$?) # Debug output
+	@(ps -ef | grep -v grep | grep kubectl | grep port-forward | grep argocd-server | awk '{print $$2}' | grep -E '^[0-9]+$$' | xargs --no-run-if-empty kill)
 	kubectl label namespace default istio-injection=enabled
 	kubectl label namespace argocd istio-injection=enabled
 	@echo "ArgoCD foi instalado com sucesso!"
@@ -112,7 +115,10 @@ giropops-senhas:
 	sleep 2
 	argocd app create giropops-senhas --repo https://github.com/badtuxx/giropops-senhas.git --path . --dest-name $(CLUSTER) --dest-namespace default
 	argocd app sync giropops-senhas
-	ps -ef | grep -v "ps -ef" | grep kubectl | grep port-forward | grep argocd-server | awk '{print $$2}' | xargs kill
+	sleep 60
+	@echo "Killing port-forward process..."
+	@(ps -ef | grep -v grep | grep kubectl | grep port-forward | grep argocd-server; echo $$?) # Debug output
+	@(ps -ef | grep -v grep | grep kubectl | grep port-forward | grep argocd-server | awk '{print $$2}' | grep -E '^[0-9]+$$' | xargs --no-run-if-empty kill)
 	@echo "Giropops-Senhas foi instalado com sucesso!"
 
 # Instalando o Giropops-Locust
@@ -123,8 +129,10 @@ giropops-locust:
 	sleep 2
 	argocd app create giropops-locust --repo https://github.com/badtuxx/giropops-senhas.git --path . --dest-name $(CLUSTER) --dest-namespace default
 	argocd app sync giropops-locust
-	@sleep 180
-	ps -ef | grep -v "ps -ef" | grep kubectl | grep port-forward | grep argocd-server | awk '{print $2}' | grep -E '^[0-9]+$' | xargs --no-run-if-empty kill
+	sleep 60
+	@echo "Killing port-forward process..."
+	@(ps -ef | grep -v grep | grep kubectl | grep port-forward | grep argocd-server; echo $$?) # Debug output
+	@(ps -ef | grep -v grep | grep kubectl | grep port-forward | grep argocd-server | awk '{print $$2}' | grep -E '^[0-9]+$$' | xargs --no-run-if-empty kill)
 	@echo "Giropops-Locust foi instalado com sucesso!"
 
 # Instalando o Kube-Prometheus
